@@ -28,8 +28,8 @@ function blockchain_usage {
 }
 
 function blockchain_chaincode {
-    rm -rf $btpdir/ORGANIZATION/chaincode/$shdir/$CHAINCODE
-    cp -rf $shdir/$CHAINCODE $btpdir/ORGANIZATION/chaincode/$shdir/$CHAINCODE
+    rm -rf $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
+    cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
     echo $btpdir
     blockchain_chaincode_deploy
 }
@@ -144,7 +144,7 @@ function blockchain_env {
     ORDERER_ADDR=$ORDERER.$DOMAIN:7050
     GLOBAL_FLAGS="-o $ORDERER_ADDR --tls --cafile /etc/hyperledger/fabric/orderer-tls/tlsca.$DOMAIN-cert.pem"
     PEER=peer0.$ORGANIZATION.$DOMAIN
-    CHAINCODE_DIR=/etc/hyperledger/fabric/chaincode/$shdir
+    CHAINCODE_DIR=/etc/hyperledger/fabric/chaincode$shdir
 }
 
 function main {
@@ -166,6 +166,9 @@ function main {
                                         ;;
                     -a | --args)        shift
                                         ARGS=$1
+                                        ;;
+                    -p | --path)        shift
+                                        PATH=$1
                                         ;;
 					*)
                                         blockchain_usage
