@@ -19,139 +19,32 @@ function blockchain_usage {
     echo " -cc  | --chanicode   : chaincode name            (default : basic)"
     echo " -v   | --version     : chaincode's version       (default : 1.0)"
     echo " -s   | --sequence    : chaincode's sequence      (default : 1)"
-    echo " -p   | --path        : chaincode's path          (default : path)"
+    echo " -p   | --cpath        : chaincode's path          (default : path)"
     echo "-------------------------------------------------------------------------"
     echo " Examples"
     echo " ./chaincode.sh \${command} \${flags}"
-    echo " ./chaincode.sh chaincode -cc basic -v 1.0 -s 1"
+    echo " ./chaincode.sh chaincode -cc testcc -v 1.0 -s 1 -p /home/student0/testCC"
     echo "========================================================================="
 }
 
 function blockchain_chaincode {
-    rm -rf $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
-    mkdir -p $btpdir/$ORGANIZATION/chaincode$shdir
-    cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/
-    $btpdir/e-node-2.sh chaincode -cc $CHAINCODE -v $VERSION -s $SEQUENCE -p $shdir
+    rm -rf $btpdir/$ORGANIZATION/chaincode$CPATH
+    mkdir -p $btpdir/$ORGANIZATION/chaincode$CPATH
+    cp -rf $CPATH $btpdir/$ORGANIZATION/chaincode$CPATH/
+    $btpdir/e-node-2.sh chaincode -cc $CHAINCODE -v $VERSION -s $SEQUENCE -p $CPATH
     # blockchain_chaincode_deploy
 }
 
-function blockchain_chaincode_deploy {
-    blockchain_chaincode_package
-    blockchain_chaincode_install
-
-    blockchain_chaincode_approveformyorg
-    sleep 1s
-    blockchain_chaincode_checkcommitreadiness
-    blockchain_chaincode_commit
-    blockchain_chaincode_querycommitted
-}
-
-function blockchain_chaincode_package {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode package $CHAINCODE_DIR/$CHAINCODE-$VERSION.tar.gz --path $CHAINCODE_DIR/$CHAINCODE --lang golang --label $CHAINCODE-$VERSION"
-}
-
-function blockchain_chaincode_install {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode install $CHAINCODE_DIR/$CHAINCODE-$VERSION.tar.gz"
-}
-
-function blockchain_chaincode_queryinstalled {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode queryinstalled"
-}
-
-function blockchain_chaincode_getpackageid {
-    blockchain_chaincode_queryinstalled
-
-    PACKAGE_ID=$(sed -n "/$CHAINCODE-$VERSION/{s/^Package ID: //; s/, Label:.*$//; p;}" $btpdir/log.txt)
-}
-
-function blockchain_chaincode_approveformyorg {
-    blockchain_chaincode_getpackageid
-
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode approveformyorg \
-    --channelID $CHANNEL \
-    --name $CHAINCODE \
-    --version $VERSION \
-    --package-id $PACKAGE_ID \
-    --sequence $SEQUENCE \
-    $GLOBAL_FLAGS"
-}
-
-function blockchain_chaincode_checkcommitreadiness {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode checkcommitreadiness  \
-    --channelID $CHANNEL \
-    --name $CHAINCODE \
-    --version $VERSION \
-    --sequence $SEQUENCE \
-    $GLOBAL_FLAGS"
-}
-
-function blockchain_chaincode_commit {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode commit  \
-    --channelID $CHANNEL \
-    --name $CHAINCODE \
-    --version $VERSION \
-    --sequence $SEQUENCE \
-    $GLOBAL_FLAGS"
-}
-
-function blockchain_chaincode_querycommitted {
-    command "docker exec -it \
-    cli.$PEER \
-    peer lifecycle chaincode querycommitted  \
-    --channelID $CHANNEL \
-    $GLOBAL_FLAGS"
-}
-
-function blockchain_chaincode_invoke {
-    command "docker exec -it \
-    cli.$PEER \
-    peer chaincode invoke  \
-    --channelID $CHANNEL \
-    --name $CHAINCODE \
-    -c $ARGS \
-    $GLOBAL_FLAGS"
-}
-
-function blockchain_chaincode_query {
-    command "docker exec -it \
-    cli.$PEER \
-    peer chaincode query  \
-    --channelID $CHANNEL \
-    --name $CHAINCODE \
-    -c $ARGS"
-}
-
 function blockchain_env {
-    DOMAIN="${DOMAIN:-blockchainbusan.kr}"
-    ORDERER="${ORDERER:-orderer0}"
     ORGANIZATION="${ORGANIZATION:-edu-org1}"
-    CHANNEL="${CHANNEL:-testbed}"
     CHAINCODE="${CHAINCODE:-basic}"
     VERSION="${VERSION:-1.0}"
     SEQUENCE="${SEQUENCE:-1}"
-    MODE="${MODE:-dev}"
-    ORDERER_ADDR=$ORDERER.$DOMAIN:7050
-    GLOBAL_FLAGS="-o $ORDERER_ADDR --tls --cafile /etc/hyperledger/fabric/orderer-tls/tlsca.$DOMAIN-cert.pem"
-    PEER=peer0.$ORGANIZATION.$DOMAIN
-    CHAINCODE_DIR=/etc/hyperledger/fabric/chaincode$shdir
 }
 
 function main {
     case $1 in
-          chaincode | chaincode_package | chaincode_install | chaincode_queryinstalled \
-        | chaincode_approveformyorg | chaincode_checkcommitreadiness | chaincode_commit | chaincode_querycommitted | chaincode_invoke | chaincode_query)
+          chaincode )
             cmd=blockchain_$1
             shift
             while [ "$1" != "" ]; do
@@ -168,8 +61,8 @@ function main {
                     -a | --args)        shift
                                         ARGS=$1
                                         ;;
-                    -p | --path)        shift
-                                        PATH=$1
+                    -p | --cpath)        shift
+                                        CPATH=$1
                                         ;;
 					*)
                                         blockchain_usage
