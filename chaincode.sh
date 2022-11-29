@@ -29,7 +29,8 @@ function blockchain_usage {
 
 function blockchain_chaincode {
     rm -rf $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
-    cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
+    mkdir $btpdir/$ORGANIZATION/chaincode$shdir
+    cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/
     echo $btpdir
     blockchain_chaincode_deploy
 }
