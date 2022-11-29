@@ -31,7 +31,8 @@ function blockchain_chaincode {
     rm -rf $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
     mkdir -p $btpdir/$ORGANIZATION/chaincode$shdir
     cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/
-    $btpdir/e-node-2 chaincode -cc $CHAINCODE -v $VERSION -s $SEQUENCE
+    $btpdir/e-node-2.sh chaincode -cc $CHAINCODE -v $VERSION -s $SEQUENCE -p $shdir
+    # blockchain_chaincode_deploy
 }
 
 function blockchain_chaincode_deploy {
