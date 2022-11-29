@@ -22,17 +22,16 @@ function blockchain_usage {
     echo " -p   | --path        : chaincode's path          (default : path)"
     echo "-------------------------------------------------------------------------"
     echo " Examples"
-    echo " ./e-node-2.sh \${command} \${flags}"
-    echo " ./e-node-2.sh chaincode -cc basic -v 1.0 -s 1"
+    echo " ./chaincode.sh \${command} \${flags}"
+    echo " ./chaincode.sh chaincode -cc basic -v 1.0 -s 1"
     echo "========================================================================="
 }
 
 function blockchain_chaincode {
     rm -rf $btpdir/$ORGANIZATION/chaincode$shdir/$CHAINCODE
-    mkdir $btpdir/$ORGANIZATION/chaincode$shdir
+    mkdir -p $btpdir/$ORGANIZATION/chaincode$shdir
     cp -rf $shdir/$CHAINCODE $btpdir/$ORGANIZATION/chaincode$shdir/
-    echo $btpdir
-    blockchain_chaincode_deploy
+    $btpdir/e-node-2 chaincode -cc $CHAINCODE -v $VERSION -s $SEQUENCE
 }
 
 function blockchain_chaincode_deploy {
